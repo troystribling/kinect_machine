@@ -1,0 +1,5 @@
+# .gems generated gem export file. Note that any env variable settings will be missing. Append these after using a ';' field separator
+eventmachine -v0.12.10
+git -v1.2.5
+jeweler -v1.6.4
+rake -v0.9.2.2
