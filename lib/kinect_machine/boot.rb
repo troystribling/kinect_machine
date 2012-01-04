@@ -1,0 +1,2 @@
+module KinectMachine
+end
