@@ -24,7 +24,10 @@ module KinectMachine
       self.log_file = add_path(self.log_file)
       self.logger = Logger.new(self.log_file, 10, 1024000)
       self.logger.level = Logger::WARN 
-      self.config = File.open(self.config_file) {|yf| YAML::load(yf)}
+      if File.exists?(self.config_file)
+        self.config = File.open(self.config_file) {|yf| YAML::load(yf)}
+      else
+      end
     end
   end
 end
