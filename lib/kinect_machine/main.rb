@@ -20,13 +20,19 @@ module KinectMachine
     def logger; @logger ||= Logger.new(STDOUT); end
     def logger=(logger); @logger = logger; end
     def add_path(dir); File.join(self.app_path, dir); end
+    def host
+      config['host'] || '0.0.0.0'
+    end
+    def port
+      config['port'] || '6969'
+    end
     def boot
       self.log_file = add_path(self.log_file)
       self.logger = Logger.new(self.log_file, 10, 1024000)
       self.logger.level = Logger::WARN 
-      if File.exists?(self.config_file)
-        self.config = File.open(self.config_file) {|yf| YAML::load(yf)}
-      else
+      self.config = File.exists?(self.config_file) ? File.open(self.config_file){|yf| YAML::load(yf)} : {}
+      Eventmachine::run do
+        Eventmachine::start_server self.host, self.port, KinectMachine::Server
       end
     end
   end
