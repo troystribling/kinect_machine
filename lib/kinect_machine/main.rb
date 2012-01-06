@@ -12,10 +12,7 @@ end
 
 module KinectMachine
   class KinectMachineError < Exception; end
-  @app_path = File.expand_path(File.dirname($0))
-  @config_file = File.join(self.app_path, "kinect_machine.yml")
-  @log_file = STDOUT
-  class << self
+class << self
     attr_accessor :config_file, :config, :app_path, :log_file
     def logger; @logger ||= Logger.new(STDOUT); end
     def logger=(logger); @logger = logger; end
@@ -27,12 +24,15 @@ module KinectMachine
       config['port'] || '6969'
     end
     def boot
-      self.log_file = add_path(self.log_file)
+      @app_path = File.expand_path(File.dirname($0))
+      @config_file = File.join(self.app_path, "kinect_machine.yml")
+      @log_file ||= STDOUT
       self.logger = Logger.new(self.log_file, 10, 1024000)
-      self.logger.level = Logger::WARN 
+      self.logger.level = Logger::DEBUG
       self.config = File.exists?(self.config_file) ? File.open(self.config_file){|yf| YAML::load(yf)} : {}
-      Eventmachine::run do
-        Eventmachine::start_server self.host, self.port, KinectMachine::Server
+      EventMachine::run do
+        EventMachine::start_server self.host, self.port, KinectMachine::Server
+        logger.info "kinectMachine started on #{self.host}:#{self.port}"
       end
     end
   end
