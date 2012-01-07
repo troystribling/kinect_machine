@@ -4,5 +4,6 @@ require 'optparse'
 
 require 'rubygems'
 require 'eventmachine'
+require 'em-websocket'
 require 'kinect_machine/server'
 require 'kinect_machine/main'

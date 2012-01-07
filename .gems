@@ -1,4 +1,7 @@
 # .gems generated gem export file. Note that any env variable settings will be missing. Append these after using a ';' field separator
+addressable -v2.2.6
+bundler -v1.0.21
+em-websocket -v0.3.6
 eventmachine -v0.12.10
 git -v1.2.5
 jeweler -v1.6.4
