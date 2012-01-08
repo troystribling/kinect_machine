@@ -6,7 +6,7 @@ module KinectMachine
     def logger=(logger); @logger = logger; end
     def add_path(dir); File.join(self.app_path, dir); end
     def host; config['host'] || '0.0.0.0'; end
-    def port; config['port'] || '6969'; end
+    def port; config['port'] || '8558'; end
     def boot
       @app_path = File.expand_path(File.dirname($0))
       @config_file = File.join(self.app_path, "kinect_machine.yml")
