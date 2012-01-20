@@ -17,7 +17,8 @@ module KinectMachine
   end
   module Sockets
     def post_init
-      KinectMachine.logger.info "Socket opened"
+      port, ip = Socket.unpack_sockaddr_in(get_peername)
+      KinectMachine.logger.info "Socket opened: #{ip}:#{port}"
     end
     def receive_data(data)
       KinectMachine.logger.info "Received message on socket: #{data}"

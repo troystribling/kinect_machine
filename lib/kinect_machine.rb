@@ -1,6 +1,7 @@
 $:.unshift(File.dirname(__FILE__))
 require 'logger'
 require 'optparse'
+require 'socket'
 
 require 'rubygems'
 require 'eventmachine'
