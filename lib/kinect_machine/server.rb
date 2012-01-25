@@ -1,6 +1,8 @@
 module KinectMachine
   class Server
+    @sessions = 0
     class << self
+      attr_reader :sessions
       def process_msg(socket, msg)
         server = self.new(socket)
         server.process_msg(msg)

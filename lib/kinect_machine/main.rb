@@ -1,36 +1,54 @@
 module KinectMachine
+
+  @sessions = 0
+  class << self
+    attr_reader :sessions
+    def sessions=(val); @sessions = val ;end
+  end
   def self.websockets
     EventMachine::WebSocket.start(:host => host, :port => port) do |socket|
       socket.onopen do
         logger.info "Websocket opened: #{socket.request.inspect}"
+        logger.info "Sessions: #{self.sessions}"
         socket.send "Hello Client"
       end
       socket.onclose do 
+        self.sessions -= 1
+        logger.info "Sessions: #{self.sessions}"
         logger.info "Websocket closed: #{socket.request.inspect}"
       end
-      socket.onmessage {|msg|
-        logger.info "Received message on websocket: #{socket.request.inspect}"
-        logger.info "Message: #{msg}"
-        KinectMachine::Server.process_msg(socket, msg)
-      }
+      socket.onmessage do |msg|
+       KinectMachine::Server.process_msg(socket, msg)
+      end
     end
   end
-  module Sockets
+
+  class Sockets < EventMachine::Connection
     def post_init
       port, ip = Socket.unpack_sockaddr_in(get_peername)
+      KinectMachine.sessions += 1
+      send "Hello Client"
       KinectMachine.logger.info "Socket opened: #{ip}:#{port}"
+      KinectMachine.logger.info "Sessions: #{KinectMachine.sessions}"
     end
     def receive_data(data)
-      KinectMachine.logger.info "Received message on socket: #{data}"
+     KinectMachine::Server.process_msg(self, data)
+    end
+    def send(msg)
+      send_data(msg)
     end
     def unbind
+      KinectMachine.sessions -= 1
+      KinectMachine.logger.info "Sessions: #{KinectMachine.sessions}"
       KinectMachine.logger.info "Socket closed"
     end
   end
   def self.sockets
     EventMachine.start_server host, port, Sockets
   end
+
   class KinectMachineError < Exception; end
+
   class << self
     attr_accessor :config_file, :config, :app_path, :log_file, :debug, :use_websockets
     def logger; @logger ||= Logger.new(STDOUT); end
