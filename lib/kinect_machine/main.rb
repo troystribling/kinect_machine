@@ -1,16 +1,13 @@
 module KinectMachine
 
   @sessions = 0
-  class << self
-    attr_reader :sessions
-    def sessions=(val); @sessions = val ;end
-  end
+
   def self.websockets
     EventMachine::WebSocket.start(:host => host, :port => port) do |socket|
       socket.onopen do
+        KinectMachine.sessions += 1
         logger.info "Websocket opened: #{socket.request.inspect}"
         logger.info "Sessions: #{self.sessions}"
-        socket.send "Hello Client"
       end
       socket.onclose do 
         self.sessions -= 1
@@ -27,7 +24,6 @@ module KinectMachine
     def post_init
       port, ip = Socket.unpack_sockaddr_in(get_peername)
       KinectMachine.sessions += 1
-      send "Hello Client"
       KinectMachine.logger.info "Socket opened: #{ip}:#{port}"
       KinectMachine.logger.info "Sessions: #{KinectMachine.sessions}"
     end
@@ -39,8 +35,8 @@ module KinectMachine
     end
     def unbind
       KinectMachine.sessions -= 1
-      KinectMachine.logger.info "Sessions: #{KinectMachine.sessions}"
       KinectMachine.logger.info "Socket closed"
+      KinectMachine.logger.info "Sessions: #{KinectMachine.sessions}"
     end
   end
   def self.sockets
@@ -50,7 +46,9 @@ module KinectMachine
   class KinectMachineError < Exception; end
 
   class << self
+    attr_reader :sessions
     attr_accessor :config_file, :config, :app_path, :log_file, :debug, :use_websockets
+    def sessions=(val); @sessions = val ;end
     def logger; @logger ||= Logger.new(STDOUT); end
     def logger=(logger); @logger = logger; end
     def add_path(dir); File.join(self.app_path, dir); end

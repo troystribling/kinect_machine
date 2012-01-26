@@ -3,6 +3,8 @@ addressable -v2.2.6
 bundler -v1.0.21
 em-websocket -v0.3.6
 eventmachine -v0.12.10
+ffi -v1.0.11
 git -v1.2.5
 jeweler -v1.6.4
 rake -v0.9.2.2
+ruby-freenect -v0.0.2

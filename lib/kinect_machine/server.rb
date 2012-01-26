@@ -14,10 +14,15 @@ module KinectMachine
     end
     def logger; KinectMachine.logger; end
     def process_msg(msg)
-       logger.info "Sending message on socket: #{socket.request.inspect}"
-       response =  "#{msg}"
-       logger.info "Message: '#{response}'"
-       socket.send response
+      logger.info "Resceived message on socket: #{socket.inspect}"
+      msg = JSON.parse(msg)
+      logger.info "Message: '#{msg.inspect}'"
+      send_method(msg['type'].to_sym, msg['request']) if (msg['type'])
+    end
+    def tilt(msg)
+      p msg
+    end
+    def led(msg)
     end
   end
 end

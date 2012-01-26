@@ -1,11 +1,17 @@
 require 'rubygems'
+require 'json'
 require 'eventmachine'
 
 module KinectMachine
 
   def post_init
     puts "connected"
-    send_data "testing"
+    tilt(5)
+  end
+
+  def tilt(val)
+    msg = {:type => :tilt, :request => {:tilt => 5}}
+    send_data msg.to_json
   end
 
   def receive_data(data)
