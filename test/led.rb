@@ -6,7 +6,7 @@ module KinectMachine
   @leds = [:led_off, :led_green, :led_red, :led_yellow, :led_blink_green, :led_blink_red_yellow, :led_off]
   @led = 0
   class << self
-    attr_accessor :tilts, :tilt, :leds, :led
+    attr_accessor :leds, :led
   end
   def post_init
     puts "connected"
@@ -17,6 +17,7 @@ module KinectMachine
   end
   def unbind
     puts "closed"
+    EventMachine.stop_event_loop
   end
   def led_task
     EventMachine.add_timer(5) do
@@ -24,13 +25,15 @@ module KinectMachine
       KinectMachine.led += 1
       if KinectMachine.led < KinectMachine.leds.length
         led_task
+      else
+        EventMachine.stop_event_loop
       end
     end
   end
   def led(val)
     msg = {:type => :led, :request => {:led => val}}
     puts "Sending msg: #{msg.inspect}"
-    send_data msg.to_json
+    send_data(msg.to_json)
   end
 end
 
