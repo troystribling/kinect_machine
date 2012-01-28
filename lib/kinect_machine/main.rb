@@ -6,8 +6,13 @@ module KinectMachine
     EventMachine::WebSocket.start(:host => host, :port => port) do |socket|
       socket.onopen do
         KinectMachine.sessions += 1
-        logger.info "WEBSOCKET OPENED: #{socket.request.inspect}"
-        logger.info "SESSIONS: #{self.sessions}"
+        if KinectMachine.sessions > KinectMachine.kinects
+          KinectMachine.logger.warn "MAXIMUM SESSIONS EXCEEDED"
+          socket.close_connection
+        else
+          logger.info "WEBSOCKET OPENED: #{socket.request.inspect}"
+          logger.info "SESSIONS: #{self.sessions}"
+        end
       end
       socket.onclose do 
         self.sessions -= 1
@@ -23,10 +28,15 @@ module KinectMachine
   class Sockets < EventMachine::Connection
 
     def post_init
-      port, ip = Socket.unpack_sockaddr_in(get_peername)
       KinectMachine.sessions += 1
-      KinectMachine.logger.info "SOCKET OPENED: #{ip}:#{port}"
-      KinectMachine.logger.info "SESSIONS: #{KinectMachine.sessions}"
+      if KinectMachine.sessions > KinectMachine.kinects
+        KinectMachine.logger.warn "MAXIMUM SESSIONS EXCEEDED"
+        close_connection
+      else
+        port, ip = Socket.unpack_sockaddr_in(get_peername)
+        KinectMachine.logger.info "SOCKET OPENED: #{ip}:#{port}"
+        KinectMachine.logger.info "SESSIONS: #{KinectMachine.sessions}"
+      end
     end
 
     def receive_data(data)
