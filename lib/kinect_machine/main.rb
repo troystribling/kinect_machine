@@ -46,9 +46,8 @@ module KinectMachine
   class KinectMachineError < Exception; end
 
   class << self
-    attr_reader :sessions
-    attr_accessor :config_file, :config, :app_path, :log_file, :debug, :use_websockets
-    def sessions=(val); @sessions = val ;end
+    attr_reader :kinects
+    attr_accessor :config_file, :config, :app_path, :log_file, :debug, :use_websockets, :sessions
     def logger; @logger ||= Logger.new(STDOUT); end
     def logger=(logger); @logger = logger; end
     def add_path(dir); File.join(self.app_path, dir); end
@@ -58,12 +57,14 @@ module KinectMachine
       @app_path = File.expand_path(File.dirname($0))
       @config_file = File.join(self.app_path, "kinect_machine.yml")
       @log_file ||= STDOUT
+      @kinects = Freenect.get_device_count
       self.logger = Logger.new(self.log_file, 10, 1024000)
       self.logger.level = self.debug ? Logger::DEBUG : Logger::INFO
       self.config = File.exists?(self.config_file) ? File.open(self.config_file){|yf| YAML::load(yf)} : {}
       logger.debug "DEBUG messages enabled"
       logger.debug "Config #{config.inspect}"
       logger.debug "Host: #{host}, Port: #{port}"
+      logger.info "Found #{kinects} kinects"
       EventMachine.run do
         if use_websockets
           logger.info "Starting websocket server"

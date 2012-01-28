@@ -1,8 +1,6 @@
 module KinectMachine
   class Server
-    @sessions = 0
-    class << self
-      attr_reader :sessions
+   class << self
       def process_msg(socket, msg)
         server = self.new(socket)
         server.process_msg(msg)
@@ -20,9 +18,10 @@ module KinectMachine
       send_method(msg['type'].to_sym, msg['request']) if (msg['type'])
     end
     def tilt(msg)
-      p msg
+      Freenect.set_tilt(msg['tilt'].to_i)
     end
     def led(msg)
+      Freenect.set_led(msg['led'].to_sym)
     end
   end
 end
