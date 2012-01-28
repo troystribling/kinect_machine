@@ -12,16 +12,16 @@ module KinectMachine
   end
 
   def post_init
-    puts "connected"
+    puts "CONNECTED"
     led_task
   end
 
   def receive_data(data)
-    p JSON.parse(data)
+    puts "RECEIVED: #{JSON.parse(data)}"
   end
 
   def unbind
-    puts "closed"
+    puts "CLOSED"
     EventMachine.stop_event_loop
   end
 
@@ -39,7 +39,7 @@ module KinectMachine
 
   def led(val)
     msg = {:action => :set_led, :params => {:led => val}}
-    puts "Sending msg: #{msg.inspect}"
+    puts "SENDING: #{msg.inspect}"
     send_data(msg.to_json)
   end
 

@@ -6,13 +6,13 @@ module KinectMachine
     EventMachine::WebSocket.start(:host => host, :port => port) do |socket|
       socket.onopen do
         KinectMachine.sessions += 1
-        logger.info "Websocket opened: #{socket.request.inspect}"
-        logger.info "Sessions: #{self.sessions}"
+        logger.info "WEBSOCKET OPENED: #{socket.request.inspect}"
+        logger.info "SESSIONS: #{self.sessions}"
       end
       socket.onclose do 
         self.sessions -= 1
-        logger.info "Sessions: #{self.sessions}"
-        logger.info "Websocket closed: #{socket.request.inspect}"
+        logger.info "SESSIONS: #{self.sessions}"
+        logger.info "WEBSOCKET CLOSED: #{socket.request.inspect}"
       end
       socket.onmessage do |msg|
        KinectMachine::Server.process_msg(socket, msg)
@@ -25,8 +25,8 @@ module KinectMachine
     def post_init
       port, ip = Socket.unpack_sockaddr_in(get_peername)
       KinectMachine.sessions += 1
-      KinectMachine.logger.info "Socket opened: #{ip}:#{port}"
-      KinectMachine.logger.info "Sessions: #{KinectMachine.sessions}"
+      KinectMachine.logger.info "SOCKET OPENED: #{ip}:#{port}"
+      KinectMachine.logger.info "SESSIONS: #{KinectMachine.sessions}"
     end
 
     def receive_data(data)
@@ -39,8 +39,8 @@ module KinectMachine
 
     def unbind
       KinectMachine.sessions -= 1
-      KinectMachine.logger.info "Socket closed"
-      KinectMachine.logger.info "Sessions: #{KinectMachine.sessions}"
+      KinectMachine.logger.info "SOCKET CLOSED"
+      KinectMachine.logger.info "SESSIONS: #{KinectMachine.sessions}"
     end
 
   end
@@ -70,19 +70,19 @@ module KinectMachine
       self.logger = Logger.new(self.log_file, 10, 1024000)
       self.logger.level = self.debug ? Logger::DEBUG : Logger::INFO
       self.config = File.exists?(self.config_file) ? File.open(self.config_file){|yf| YAML::load(yf)} : {}
-      logger.debug "DEBUG messages enabled"
-      logger.debug "Config #{config.inspect}"
-      logger.debug "Host: #{host}, Port: #{port}"
-      logger.info "Found #{kinects} kinects"
+      logger.debug "DEBUG MESSAGES ENABLED"
+      logger.debug "CONFIG: #{config.inspect}"
+      logger.debug "HOST: #{host}, PORT: #{port}"
+      logger.info "FOUND #{kinects} KINECTS"
       EventMachine.run do
         if use_websockets
-          logger.info "Starting websocket server"
+          logger.info "STARTING WEBSOCKET SERVER"
           websockets
         else
-          logger.info "Starting socket server"
+          logger.info "STARTING SOCKET SERVER"
           sockets
         end
-        logger.info "kinectMachine started on #{self.host}:#{self.port}"
+        logger.info "kinectMachine STARTED ON: #{self.host}:#{self.port}"
       end
     end
 

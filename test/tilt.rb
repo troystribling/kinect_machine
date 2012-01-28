@@ -12,16 +12,16 @@ module KinectMachine
   end
 
   def post_init
-    puts "connected"
+    puts "CONNECTED"
     tilt_task
   end
 
   def receive_data(data)
-    p JSON.parse(data)
+    puts "RECEIVED: #{JSON.parse(data)}"
   end
 
   def unbind
-    puts "closed"
+    puts "CLOSED"
     EventMachine.stop_event_loop
   end
 
@@ -46,13 +46,13 @@ module KinectMachine
 
   def tilt(val)
     msg = {:action=> :set_tilt, :params => {:tilt => val}}
-    puts "Sending msg: #{msg.inspect}"
+    puts "SENDING: #{msg.inspect}"
     send_data(msg.to_json)
   end
 
   def tilt_state
     msg = {:action => :get_tilt_state}
-    puts "Sending msg: #{msg.inspect}"
+    puts "SENDING: #{msg.inspect}"
     send_data(msg.to_json)
   end
 
