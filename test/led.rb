@@ -17,7 +17,13 @@ module KinectMachine
   end
 
   def receive_data(data)
-    puts "RECEIVED: #{JSON.parse(data)}"
+    msg = JSON.parse(data)
+    if msg['status'].eql?('success')
+      puts "RECEIVED: #{msg.inspect}"
+    else
+      puts "ERROR: ACTION=#{msg['action']}, MESSAGE=#{msg['message']}"
+      EventMachine.stop_event_loop
+    end
   end
 
   def unbind

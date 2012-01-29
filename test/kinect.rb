@@ -7,7 +7,7 @@ module KinectMachine
   @video_mode = 0
   @depth_modes = 0
   @depth_mode = 0
-  @video_formats = [:freenect_video_rgb, :freenect_video_bayer, :freenect_video_ir_8bit, :freenect_video_ir_10bit, 
+  @video_formats = [:freenect_video_rgb, :freenect_video_bayer, :freenect_video_ir_8bit, :freenect_video_ir_10bit,
                     :freenect_video_ir_10bit_packed, :freenect_video_yuv_rgb, :freenect_video_yuv_raw]
   @video_format = 0
   @depth_formats = [:freenect_depth_11bit, :freenect_depth_10bit, :freenect_depth_11bit_packed, :freenect_depth_10bit_packed]
@@ -26,7 +26,12 @@ module KinectMachine
 
   def receive_data(data)
     msg = JSON.parse(data)
-    send(msg['action'].to_sym, msg['data'])
+    if msg['status'].eql?('success')
+      send(msg['action'].to_sym, msg['data'])
+    else
+      puts "ERROR: ACTION=#{msg['action']}, MESSAGE=#{msg['message']}"
+      EventMachine.stop_event_loop
+    end
   end
 
   def unbind
@@ -49,7 +54,6 @@ module KinectMachine
       send_data({:action => :get_depth_mode_count}.to_json)
     end
   end
-
 
   def get_depth_mode_count(data)
     KinectMachine.depth_modes = data['depth_mode_count']

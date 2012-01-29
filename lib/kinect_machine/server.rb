@@ -23,15 +23,24 @@ module KinectMachine
       logger.info "ACTION: '#{action}'"
       logger.info "PARAMS: '#{params.inspect}'"
       if respond_to?(action)
-        params.nil? ? send_method(action) : send_method(action, msg['params'])
+        begin
+          params.nil? ? send_method(action) : send_method(action, msg['params'])
+        rescue Exception => error
+          logger.error error.message
+          send_error(action, params, error.message)
+        end
       else
         logger.warn "INVALID ACTION: '#{action}'"
       end
     end
 
-    def set_tilt(msg)
-      Freenect.set_tilt(msg['tilt'].to_i)
-      get_tilt_state
+    def set_tilt(data)
+      if tilt = data['tilt']
+        Freenect.set_tilt(tilt.to_i)
+        get_tilt_state
+      else
+        raise 'tilt param missing'
+      end
     end
 
     def get_tilt_state
@@ -46,12 +55,15 @@ module KinectMachine
     end
 
     def set_led(msg)
-      led = msg['led'].to_sym
-      Freenect.set_led(led)
-      send({
-        :action => :set_led,
-        :data   => {:led => led},
-      })
+      if led = msg['led']
+        Freenect.set_led(led.to_sym)
+        send({
+          :action => :set_led,
+          :data   => {:led => led},
+        })
+      else
+        raise "led param missing"
+      end
     end
 
     def get_video_mode_count
@@ -68,24 +80,42 @@ module KinectMachine
       })
     end
 
-    def get_depth_mode(data)
-      depth_mode = Freenect.get_depth_mode(data['depth_mode_id'])
-      send({
-        :action => :get_depth_mode,
-        :data   => frame_mode_to_hash(depth_mode).merge(:format => depth_mode[:format][:depth_format])
-      })
-    end
-
     def get_video_mode(data)
-      video_mode = Freenect.get_video_mode(data['video_mode_id'])
+      if mode_id = data['video_mode_id']
+        video_mode = Freenect.get_video_mode(mode_id)
+      elsif format = data['video_format']
+        video_mode = Freenect.find_video_mode(format.to_sym, :freenect_resolution_medium)
+      else
+        raise 'video_mode_id or video_format param missing'
+      end
       send({
         :action => :get_video_mode,
         :data   => frame_mode_to_hash(video_mode).merge(:format => video_mode[:format][:video_format])
       })
     end
 
+    def get_depth_mode(data)
+      if mode_id = data['depth_mode_id']
+        depth_mode = Freenect.get_depth_mode(mode_id)
+      elsif format = data['depth_format']
+        depth_mode = Freenect.find_depth_mode(format.to_sym, :freenect_resolution_medium)
+      else
+        raise 'depth_mode_id or depth_format param missing'
+      end
+      send({
+        :action => :get_depth_mode,
+        :data   => frame_mode_to_hash(depth_mode).merge(:format => depth_mode[:format][:depth_format])
+      })
+    end
+
     def send(msg)
-      logger.info "SENDING: #{msg.inspect}"
+      logger.info "SUCCESS SENDING: #{msg.inspect}"
+      socket.send(msg.merge(:status => :success).to_json)
+    end
+
+    def send_error(action, params, error_msg)
+      msg = {:status => :error, :message => error_msg, :action => action, :params => params}
+      logger.info "ERROR SENDING: #{msg}"
       socket.send(msg.to_json)
     end
 
