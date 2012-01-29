@@ -35,13 +35,36 @@ module KinectMachine
   end
 
   def get_video_mode_count(data)
-    puts "VIDEO MODE COUNT: #{data['video_mode_count']}"
-    send_data({:action => :get_depth_mode_count}.to_json)
+    KinectMachine.video_modes = data['video_mode_count']
+    puts "VIDEO MODE COUNT: #{KinectMachine.video_modes}"
+    send_data({:action => :get_video_mode, :params => {:video_mode_id => KinectMachine.video_mode}}.to_json)
   end
 
+  def get_video_mode(data)
+    puts "VIDEO MODE: #{data.inspect}"
+    KinectMachine.video_mode +=1
+    if KinectMachine.video_mode < KinectMachine.video_modes
+      send_data({:action => :get_video_mode, :params => {:video_mode_id => KinectMachine.video_mode}}.to_json)
+    else
+      send_data({:action => :get_depth_mode_count}.to_json)
+    end
+  end
+
+
   def get_depth_mode_count(data)
-    puts "DEPTH MODE COUNT: #{data['depth_mode_count']}"
-    EventMachine.stop_event_loop
+    KinectMachine.depth_modes = data['depth_mode_count']
+    puts "DEPTH MODE COUNT: #{KinectMachine.depth_modes}"
+    send_data({:action => :get_depth_mode, :params => {:depth_mode_id => KinectMachine.depth_mode}}.to_json)
+  end
+
+  def get_depth_mode(data)
+    puts "DEPTH MODE: #{data.inspect}"
+    KinectMachine.depth_mode +=1
+    if KinectMachine.depth_mode < KinectMachine.depth_modes
+      send_data({:action => :get_depth_mode, :params => {:depth_mode_id => KinectMachine.depth_mode}}.to_json)
+    else
+      EventMachine.stop_event_loop
+    end
   end
 
 end

@@ -68,10 +68,39 @@ module KinectMachine
       })
     end
 
+    def get_depth_mode(data)
+      depth_mode = Freenect.get_depth_mode(data['depth_mode_id'])
+      send({
+        :action => :get_depth_mode,
+        :data   => frame_mode_to_hash(depth_mode).merge(:format => depth_mode[:format][:depth_format])
+      })
+    end
+
+    def get_video_mode(data)
+      video_mode = Freenect.get_video_mode(data['video_mode_id'])
+      send({
+        :action => :get_video_mode,
+        :data   => frame_mode_to_hash(video_mode).merge(:format => video_mode[:format][:video_format])
+      })
+    end
+
     def send(msg)
       logger.info "SENDING: #{msg.inspect}"
       socket.send(msg.to_json)
     end
 
-   end
+    def frame_mode_to_hash(frame_mode)
+      {
+        :resolution             => frame_mode[:resolution],
+        :bytes                  => frame_mode[:bytes],
+        :width                  => frame_mode[:width],
+        :height                 => frame_mode[:height],
+        :data_bits_per_pixel    => frame_mode[:data_bits_per_pixel],
+        :padding_bits_per_pixel => frame_mode[:padding_bits_per_pixel],
+        :framerate              => frame_mode[:framerate],
+        :is_valid               => frame_mode[:is_valid]
+      }
+    end
+
+  end
 end
