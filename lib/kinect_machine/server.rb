@@ -1,13 +1,6 @@
 module KinectMachine
   class Server
 
-   class << self
-      def process_msg(socket, msg)
-        server = self.new(socket)
-        server.process_msg(msg)
-      end
-    end
-
     attr_reader :socket
 
     def initialize(socket)

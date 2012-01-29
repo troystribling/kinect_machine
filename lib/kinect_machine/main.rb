@@ -1,12 +1,14 @@
 module KinectMachine
 
   @sessions = 0
+  MAX_SESSIONS = 1
 
   def self.websockets
     EventMachine::WebSocket.start(:host => host, :port => port) do |socket|
+      server = Server.new(socket)
       socket.onopen do
         KinectMachine.sessions += 1
-        if KinectMachine.sessions > KinectMachine.kinects
+         if KinectMachine.sessions > KinectMachine::MAX_SESSIONS
           KinectMachine.logger.warn "MAXIMUM SESSIONS EXCEEDED"
           socket.close_connection
         else
@@ -19,8 +21,8 @@ module KinectMachine
         logger.info "SESSIONS: #{self.sessions}"
         logger.info "WEBSOCKET CLOSED: #{socket.request.inspect}"
       end
-      socket.onmessage do |msg|
-       KinectMachine::Server.process_msg(socket, msg)
+      socket.onmessage do |data|
+        server.process_msg(data)
       end
     end
   end
@@ -28,8 +30,9 @@ module KinectMachine
   class Sockets < EventMachine::Connection
 
     def post_init
+      @server = Server.new(self)
       KinectMachine.sessions += 1
-      if KinectMachine.sessions > KinectMachine.kinects
+      if KinectMachine.sessions > KinectMachine::MAX_SESSIONS
         KinectMachine.logger.warn "MAXIMUM SESSIONS EXCEEDED"
         close_connection
       else
@@ -40,7 +43,7 @@ module KinectMachine
     end
 
     def receive_data(data)
-     KinectMachine::Server.process_msg(self, data)
+     @server.process_msg(data)
     end
 
     def send(msg)
@@ -84,15 +87,19 @@ module KinectMachine
       logger.debug "CONFIG: #{config.inspect}"
       logger.debug "HOST: #{host}, PORT: #{port}"
       logger.info "FOUND #{kinects} KINECTS"
-      EventMachine.run do
-        if use_websockets
-          logger.info "STARTING WEBSOCKET SERVER"
-          websockets
-        else
-          logger.info "STARTING SOCKET SERVER"
-          sockets
+      if kinects == 1
+        EventMachine.run do
+          if use_websockets
+            logger.info "STARTING WEBSOCKET SERVER"
+            websockets
+          else
+            logger.info "STARTING SOCKET SERVER"
+            sockets
+          end
+          logger.info "kinectMachine STARTED ON: #{self.host}:#{self.port}"
         end
-        logger.info "kinectMachine STARTED ON: #{self.host}:#{self.port}"
+      else
+        logger.error "NO KINECTS FOUND"
       end
     end
 
