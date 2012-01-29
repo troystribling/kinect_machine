@@ -50,6 +50,10 @@ module KinectMachine
     KinectMachine.video_mode +=1
     if KinectMachine.video_mode < KinectMachine.video_modes
       send_data({:action => :get_video_mode, :params => {:video_mode_id => KinectMachine.video_mode}}.to_json)
+    elsif KinectMachine.video_format < KinectMachine.video_formats.length
+       puts "GET VIDEO MODE FOR FORMAT: #{KinectMachine.video_formats[KinectMachine.video_format]}"
+       send_data({:action => :get_video_mode, :params => {:video_format => KinectMachine.video_formats[KinectMachine.video_format]}}.to_json)
+       KinectMachine.video_format += 1
     else
       send_data({:action => :get_depth_mode_count}.to_json)
     end
@@ -66,6 +70,10 @@ module KinectMachine
     KinectMachine.depth_mode +=1
     if KinectMachine.depth_mode < KinectMachine.depth_modes
       send_data({:action => :get_depth_mode, :params => {:depth_mode_id => KinectMachine.depth_mode}}.to_json)
+    elsif KinectMachine.depth_format < KinectMachine.depth_formats.length
+       puts "GET DEPTH MODE FOR FORMAT: #{KinectMachine.depth_formats[KinectMachine.depth_format]}"
+       send_data({:action => :get_depth_mode, :params => {:depth_format => KinectMachine.depth_formats[KinectMachine.depth_format]}}.to_json)
+       KinectMachine.depth_format += 1
     else
       EventMachine.stop_event_loop
     end
