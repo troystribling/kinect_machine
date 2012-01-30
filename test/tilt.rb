@@ -13,7 +13,8 @@ module KinectMachine
 
   def post_init
     puts "CONNECTED"
-    tilt_task
+    send_data({:action => :set_mode, :params => {:mode => :command}}.to_json)
+    EventMachine.next_tick{tilt_task}
   end
 
   def receive_data(data)

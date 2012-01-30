@@ -19,9 +19,7 @@ module KinectMachine
 
   def post_init
     puts "CONNECTED"
-    EventMachine.next_tick do
-      send_data({:action => :get_video_mode_count}.to_json)
-    end
+    EventMachine.next_tick{send_data({:action => :set_mode, :params => {:mode => :command}}.to_json)}
  end
 
   def receive_data(data)
@@ -37,6 +35,10 @@ module KinectMachine
   def unbind
     puts "CLOSED"
     EventMachine.stop_event_loop
+  end
+
+  def set_mode(data)
+    send_data({:action => :get_video_mode_count}.to_json)
   end
 
   def get_video_mode_count(data)

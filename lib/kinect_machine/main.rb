@@ -8,13 +8,8 @@ module KinectMachine
       server = Server.new(socket)
       socket.onopen do
         KinectMachine.sessions += 1
-         if KinectMachine.sessions > KinectMachine::MAX_SESSIONS
-          KinectMachine.logger.warn "MAXIMUM SESSIONS EXCEEDED"
-          socket.close_connection
-        else
-          logger.info "WEBSOCKET OPENED: #{socket.request.inspect}"
-          logger.info "SESSIONS: #{self.sessions}"
-        end
+        logger.info "WEBSOCKET OPENED: #{socket.request.inspect}"
+        logger.info "SESSIONS: #{self.sessions}"
       end
       socket.onclose do 
         self.sessions -= 1
@@ -32,14 +27,9 @@ module KinectMachine
     def post_init
       @server = Server.new(self)
       KinectMachine.sessions += 1
-      if KinectMachine.sessions > KinectMachine::MAX_SESSIONS
-        KinectMachine.logger.warn "MAXIMUM SESSIONS EXCEEDED"
-        close_connection
-      else
-        port, ip = Socket.unpack_sockaddr_in(get_peername)
-        KinectMachine.logger.info "SOCKET OPENED: #{ip}:#{port}"
-        KinectMachine.logger.info "SESSIONS: #{KinectMachine.sessions}"
-      end
+      port, ip = Socket.unpack_sockaddr_in(get_peername)
+      KinectMachine.logger.info "SOCKET OPENED: #{ip}:#{port}"
+      KinectMachine.logger.info "SESSIONS: #{KinectMachine.sessions}"
     end
 
     def receive_data(data)

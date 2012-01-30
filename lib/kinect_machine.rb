@@ -14,4 +14,7 @@ require 'em-websocket'
 require 'freenect'
 
 require 'kinect_machine/server'
+require 'kinect_machine/command_server'
+require 'kinect_machine/depth_server'
+require 'kinect_machine/video_server'
 require 'kinect_machine/main'
