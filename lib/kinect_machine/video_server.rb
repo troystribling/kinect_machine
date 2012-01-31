@@ -16,7 +16,7 @@ module KinectMachine
     def run_video(video_mode)
       if video_running
         EventMachine.next_tick do
-          video_buffer = Freenect.get_video(video_mode)
+          send(Freenect.get_video(video_mode))
         end
       end
     end
