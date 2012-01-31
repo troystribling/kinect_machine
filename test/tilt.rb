@@ -13,14 +13,14 @@ module KinectMachine
 
   def post_init
     puts "CONNECTED"
-    send_data({:action => :set_mode, :params => {:mode => :command}}.to_json)
-    EventMachine.next_tick{tilt_task}
+    EventMachine.next_tick{send_data({:action => :set_mode, :params => {:mode => :command}}.to_json)}
   end
 
   def receive_data(data)
     msg = JSON.parse(data)
     if msg['status'].eql?('success')
-      puts "RECEIVED: #{msg.inspect}"
+      puts "RECEIVED MSG: #{msg.inspect}"
+      tilt_task if msg['action'].eql?('set_mode')
     else
       puts "ERROR: ACTION=#{msg['action']}, MESSAGE=#{msg['message']}"
       EventMachine.stop_event_loop

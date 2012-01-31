@@ -14,6 +14,10 @@ module KinectMachine
       @socket, @mode = socket, nil
     end
 
+    def close
+      Server.mode_status[mode] = false
+    end
+
     def logger; KinectMachine.logger; end
 
     def process_msg(msg)

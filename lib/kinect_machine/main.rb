@@ -13,6 +13,7 @@ module KinectMachine
       end
       socket.onclose do 
         self.sessions -= 1
+        server.close
         logger.info "SESSIONS: #{self.sessions}"
         logger.info "WEBSOCKET CLOSED: #{socket.request.inspect}"
       end
@@ -24,6 +25,8 @@ module KinectMachine
 
   class Sockets < EventMachine::Connection
 
+    attr_reader :server
+
     def post_init
       @server = Server.new(self)
       KinectMachine.sessions += 1
@@ -33,7 +36,7 @@ module KinectMachine
     end
 
     def receive_data(data)
-     @server.process_msg(data)
+     server.process_msg(data)
     end
 
     def send(msg)
@@ -42,6 +45,7 @@ module KinectMachine
 
     def unbind
       KinectMachine.sessions -= 1
+      server.close
       KinectMachine.logger.info "SOCKET CLOSED"
       KinectMachine.logger.info "SESSIONS: #{KinectMachine.sessions}"
     end
