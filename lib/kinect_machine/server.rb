@@ -15,7 +15,7 @@ module KinectMachine
     end
 
     def close
-      Server.mode_status[mode] = false
+     Server.mode_status[mode] = false
     end
 
     def logger; KinectMachine.logger; end
