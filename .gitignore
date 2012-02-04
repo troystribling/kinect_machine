@@ -1,4 +1,4 @@
-*.video
+*.rgb
 *.ir
 *.depth
-
+rgb_file

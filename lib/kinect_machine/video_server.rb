@@ -41,6 +41,7 @@ module KinectMachine
 
     def send_frame(frame)
       @frame_count += 1
+      p frame.size
       logger.info "SENDING FRAME: #{frame_count}"
       socket.send(frame)
     end

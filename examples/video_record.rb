@@ -29,6 +29,7 @@ module KinectMachine
         EventMachine.stop_event_loop
       end
     else
+      p data.length
      file.puts data
     end
   end
