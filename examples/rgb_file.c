@@ -1,38 +1,62 @@
-#include <avcodec.h>
-#include <avformat.h>
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
 
 #include <stdio.h>
+
+#define IMAGE_WIDTH        640
+#define IMAGE_HEIGHT       480
+#define BYTES_PER_PIXEL    3
+#define FRAMES_PER_SECOND  30
 
 int main(int argc, char *argv[]) {
   AVFormatContext *pFormatCtx;
   int             i, videoStream;
-  AVCodecContext  *pCodecCtx;
-  AVCodec         *pCodec;
-  AVFrame         *pFrame;
-  AVFrame         *pFrameRGB;
+  AVCodecContext* pCodecCtx;
+  AVCodec*        pCodec;
+  AVFrame*        pFrame;
+  AVFrame*        pFrameRGB;
   AVPacket        packet;
   int             frameFinished;
   int             numBytes;
-  uint8_t         *buffer;
+  char*           buffer;
+  int             frames;
+  int             fileLen;
+  FILE*           file;
 
+  // check args
   if(argc < 2) {
-    printf("Please provide a movie file\n");
-    return -1;
+    printf("NEED AN RGB FILE NAME\n");
+    exit(-1);
   }
+
+	// read file
+  printf("ENCODING RGB FILE: %s\n", argv[1]);
+  /*buffer = (char*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT);*/
+  file = fopen(argv[1], "rb");
+  if (file == NULL) {
+    printf("ERROR OPENING FILE\n");
+    exit(-1);
+  }
+  fseek(file, 0, SEEK_END);
+  fileLen=ftell(file);
+  fseek(file, 0, SEEK_SET);
+  frames = fileLen / (BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT);
+  printf("FILE LENGTH: %d BYTES\n", fileLen);
+  printf("FRAMES: %d\n", frames);
 
   // Register all formats and codecs
   av_register_all();
 
   // Open video file
-  if(av_open_input_file(&pFormatCtx, argv[1], NULL, 0, NULL) != 0)
-    return -1; // Couldn't open file
+  /*if(av_open_input_file(&pFormatCtx, argv[1], NULL, 0, NULL) != 0)*/
+    /*return -1; // Couldn't open file*/
 
   // Retrieve stream information
   /*if(av_find_stream_info(pFormatCtx) < 0)*/
     /*return -1; // Couldn't find stream information*/
 
   // Dump information about file onto standard error
-  dump_format(pFormatCtx, 0, argv[1], 0);
+  /*dump_format(pFormatCtx, 0, argv[1], 0);*/
 
   // Find the first video stream
   /*videoStream=-1;*/
@@ -113,8 +137,6 @@ int main(int argc, char *argv[]) {
   // Close the codec
   /*avcodec_close(pCodecCtx);*/
 
-  // Close the video file
-  /*av_close_input_file(pFormatCtx);*/
-
+  fclose(file);
   return 0;
 }
