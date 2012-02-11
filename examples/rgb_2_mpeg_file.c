@@ -6,14 +6,14 @@
 
 #define IMAGE_WIDTH        640
 #define IMAGE_HEIGHT       480
-#define IMAGE_SIZE         IMAGE_WIDTH * IMAGE_HEIGHT
 #define BYTES_PER_PIXEL    3
-#define RGB_BUFFER_SIZE    (BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT)
-#define YUV_BUFFER_SIZE    ((BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT) / 2)
 #define FRAMES_PER_SECOND  25
 #define BIT_RATE           400000
 #define GOP_SIZE           10
 #define MAX_B_FRAMES       1
+#define IMAGE_SIZE         IMAGE_WIDTH * IMAGE_HEIGHT
+#define RGB_BUFFER_SIZE    (BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT)
+#define YUV_BUFFER_SIZE    ((BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT) / 2)
 
 int main(int argc, char *argv[]) {
   FILE*               rgbFile;
