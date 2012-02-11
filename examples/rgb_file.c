@@ -7,7 +7,8 @@
 #define IMAGE_WIDTH        640
 #define IMAGE_HEIGHT       480
 #define BYTES_PER_PIXEL    3
-#define FRAMES_PER_SECOND  30
+#define FRAMES_PER_SECOND  25
+#define BIT_RATE           400000
 
 int main(int argc, char *argv[]) {
   FILE*               rgbFile;
@@ -21,6 +22,8 @@ int main(int argc, char *argv[]) {
   struct SwsContext*  pRgbToYuvContext;
   AVFrame*            rgbFrame;
   AVFrame*            yuvFrame;
+  AVCodec*            mpegCodec;
+  AVCodecContext*     mpegCodecContext;
 
   // check args
   if(argc < 2) {
@@ -42,9 +45,15 @@ int main(int argc, char *argv[]) {
   printf("RGB FILE LENGTH: %d BYTES\n", rgbFileLen);
   printf("FRAMES: %d\n", frames);
 
-  // buffers
+  // buffers, frames and codecs
   rgbBuffer = (char*) malloc(rgbBufferSize);
   yuvBuffer = (char*) malloc(yuvBufferSize);
+  rgbFrame = avcodec_alloc_frame();
+  yuvFrame = avcodec_alloc_frame();
+  mpegCodec = avcodec_find_encoder(CODEC_ID_MPEG2VIDEO);
+  mpegCodecContext = avcodec_alloc_context2(CODEC_ID_MPEG2VIDEO);
+  mpegCodecContext->bit_rate = BIT_RATE;
+
 
   // Register all formats and codecs
   av_register_all();
@@ -55,12 +64,17 @@ int main(int argc, char *argv[]) {
   // convet frames
   for (curFrame = 0; curFrame < frames; curFrame++) {
     fread(rgbBuffer, 1, rgbBufferSize, rgbFile);
-    printf("CURRENT FRAME: %d, NEXT POSITION: %ld\n", curFrame, ftell(rgbFile));
+    printf("CURRENT FRAME: %d, NEXT POSITION: %ld\n", curFrame + 1, ftell(rgbFile));
   }
 
   fclose(rgbFile);
   free(rgbBuffer);
   free(yuvBuffer);
+  sws_freeContext(pRgbToYuvContext);
+  avcodec_close(mpegCodecContext);
+  av_free(mpegCodecContext);
+  av_free(rgbFrame);
+  av_free(yuvFrame);
 
   return 0;
 }
