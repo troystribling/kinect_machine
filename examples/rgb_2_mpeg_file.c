@@ -44,7 +44,6 @@ int main(int argc, char *argv[]) {
   fseek(rgbFile, 0, SEEK_END);
   rgbFileLen = ftell(rgbFile);
   fseek(rgbFile, 0, SEEK_SET);
-printf("BUFFER SIZE: %d\n", RGB_BUFFER_SIZE);
   frames = rgbFileLen / RGB_BUFFER_SIZE;
   printf("RGB FILE LENGTH: %d BYTES\n", rgbFileLen);
   printf("FRAMES: %d\n", frames);
