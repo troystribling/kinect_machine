@@ -8,6 +8,8 @@
 #define IMAGE_HEIGHT       480
 #define IMAGE_SIZE         IMAGE_WIDTH * IMAGE_HEIGHT
 #define BYTES_PER_PIXEL    3
+#define RGB_BUFFER_SIZE    (BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT)
+#define YUV_BUFFER_SIZE    ((BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT) / 2)
 #define FRAMES_PER_SECOND  25
 #define BIT_RATE           400000
 #define GOP_SIZE           10
@@ -16,10 +18,8 @@
 int main(int argc, char *argv[]) {
   FILE*               rgbFile;
   uint8_t*            rgbBuffer;
-  int                 rgbBufferSize = BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT;
   int                 rgbFileLen;
   uint8_t*            yuvBuffer;
-  int                 yuvBufferSize = (BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT) / 2;
   int                 frames;
   int                 curFrame;
   struct SwsContext*  rgbToYuvContext;
@@ -44,12 +44,13 @@ int main(int argc, char *argv[]) {
   fseek(rgbFile, 0, SEEK_END);
   rgbFileLen = ftell(rgbFile);
   fseek(rgbFile, 0, SEEK_SET);
-  frames = rgbFileLen / rgbBufferSize;
+printf("BUFFER SIZE: %d\n", RGB_BUFFER_SIZE);
+  frames = rgbFileLen / RGB_BUFFER_SIZE;
   printf("RGB FILE LENGTH: %d BYTES\n", rgbFileLen);
   printf("FRAMES: %d\n", frames);
 
   // rgb buffer
-  rgbBuffer = (uint8_t*) malloc(rgbBufferSize);
+  rgbBuffer = (uint8_t*) malloc(RGB_BUFFER_SIZE);
   rgbFrame = avcodec_alloc_frame();
   rgbFrame->data[0] = rgbBuffer;
   rgbFrame->data[1] = rgbFrame->data[0] + 1;
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]) {
   rgbFrame->linesize[2] = IMAGE_WIDTH;
 
   // yuv buffer
-  yuvBuffer = (uint8_t*) malloc(yuvBufferSize);
+  yuvBuffer = (uint8_t*) malloc(YUV_BUFFER_SIZE);
   yuvFrame = avcodec_alloc_frame();
   yuvFrame->data[0] = yuvBuffer;
   yuvFrame->data[1] = yuvFrame->data[0] + IMAGE_SIZE;
@@ -86,7 +87,7 @@ int main(int argc, char *argv[]) {
 
   // convet frames
   for (curFrame = 0; curFrame < frames; curFrame++) {
-    fread(rgbBuffer, 1, rgbBufferSize, rgbFile);
+    fread(rgbBuffer, 1, RGB_BUFFER_SIZE, rgbFile);
     sws_scale(rgbToYuvContext, rgbFrame->data, rgbFrame->linesize, 0, IMAGE_HEIGHT, yuvFrame->data, yuvFrame->linesize);
     printf("CURRENT FRAME: %d, NEXT POSITION: %ld\n", curFrame + 1, ftell(rgbFile));
   }
