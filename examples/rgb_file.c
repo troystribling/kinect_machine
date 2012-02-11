@@ -10,11 +10,17 @@
 #define FRAMES_PER_SECOND  30
 
 int main(int argc, char *argv[]) {
-  char*               rgbBuffer;
-  int                 frames;
-  int                 rgbFileLen;
   FILE*               rgbFile;
+  char*               rgbBuffer;
+  int                 rgbBufferSize = BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT;
+  int                 rgbFileLen;
+  char*               yuvBuffer;
+  int                 yuvBufferSize = (BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT) / 2;
+  int                 frames;
+  int                 curFrame;
   struct SwsContext*  pRgbToYuvContext;
+  AVFrame*            rgbFrame;
+  AVFrame*            yuvFrame;
 
   // check args
   if(argc < 2) {
@@ -24,7 +30,6 @@ int main(int argc, char *argv[]) {
 
 	// read file
   printf("ENCODING RGB FILE: %s\n", argv[1]);
-  /*buffer = (char*)malloc(IMAGE_WIDTH*IMAGE_HEIGHT);*/
   rgbFile = fopen(argv[1], "rb");
   if (rgbFile == NULL) {
     printf("ERROR OPENING FILE\n");
@@ -33,9 +38,13 @@ int main(int argc, char *argv[]) {
   fseek(rgbFile, 0, SEEK_END);
   rgbFileLen = ftell(rgbFile);
   fseek(rgbFile, 0, SEEK_SET);
-  frames = rgbFileLen / (BYTES_PER_PIXEL * IMAGE_WIDTH * IMAGE_HEIGHT);
+  frames = rgbFileLen / rgbBufferSize;
   printf("RGB FILE LENGTH: %d BYTES\n", rgbFileLen);
   printf("FRAMES: %d\n", frames);
+
+  // buffers
+  rgbBuffer = (char*) malloc(rgbBufferSize);
+  yuvBuffer = (char*) malloc(yuvBufferSize);
 
   // Register all formats and codecs
   av_register_all();
@@ -44,11 +53,14 @@ int main(int argc, char *argv[]) {
   pRgbToYuvContext = sws_getContext(IMAGE_WIDTH, IMAGE_HEIGHT, PIX_FMT_RGB24, IMAGE_WIDTH, IMAGE_HEIGHT, PIX_FMT_YUV420P, SWS_BICUBIC, NULL, NULL, NULL);
 
   // convet frames
-  for (int i =0; i < frames; i++) {
-    sws_scale();
+  for (curFrame = 0; curFrame < frames; curFrame++) {
+    fread(rgbBuffer, 1, rgbBufferSize, rgbFile);
+    printf("CURRENT FRAME: %d, NEXT POSITION: %ld\n", curFrame, ftell(rgbFile));
   }
 
   fclose(rgbFile);
+  free(rgbBuffer);
+  free(yuvBuffer);
 
   return 0;
 }
